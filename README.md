@@ -71,12 +71,12 @@ Ensure the schema configurations in the **Model View** tab map as follows:
 ### 📈 Insight 1: Growth Macro Trends & The Feb 2018 Revenue Anomaly
 * **Macro Trends (2017 - 2018):** Throughout 2017, Olist experienced healthy, linear growth where Revenue, Sales Volume, and Customer Acquisition expanded in perfect correlation. However, 2018 marked a plateau phase; both customer volume and order counts flattened out across months, showing a slight contraction toward the end of the year.
 * **The February 2018 Anomaly:** The data highlights February 2018 as the lowest revenue point in the entire timeline. Paradoxically, **Total Orders and Total Customers did not drop**—in fact, transaction volumes remained neck-and-neck with peak months (April, May) and noticeably higher than later periods (June, July, August).
-![Olist Business Dashboard](Overview.png)
-![Olist Business Dashboard](Overview_w_filterpane.png)
+![Olist Business Dashboard](Dashboard_Image/Overview.png)
+![Olist Business Dashboard](Dashboard_Image/Overview_w_filterpane.png)
 
 > 🔍 **Granular Verification via Customer Segmentation:**
 > Cross-referencing this with our K-Means segments disproves the "customer churn" hypothesis. Evidence shows that **Loyal Customers** remained highly active, still pushing nearly 506 orders in February.
-![Olist Business Dashboard](Loyal_Cus_Segment.png)
+![Olist Business Dashboard](Dashboard_Image/Dashboard_Image/Loyal_Cus_Segment.png)
 
 > The revenue crash was entirely driven by a **severe drop in Average Order Value (AOV), skyrocketing down below $150**. Customers were buying at their usual frequency, but they were checking out extremely low-value baskets.
 
