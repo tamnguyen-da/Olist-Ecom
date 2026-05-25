@@ -1,0 +1,33 @@
+Olist Ecom-Python Scripts:
+
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+# 1. ĐỌC DỮ LIỆU
+df = dataset 
+
+# Sao lưu lại bảng gốc để lát nữa gán kết quả phân cụm vào
+df_original = df.copy()
+
+# 2. CHUẨN BỊ DỮ LIỆU ĐỂ TRAINING (Chỉ lấy 3 cột RFM)
+# Loại bỏ các cột định danh, địa lý và cột ngày 'last_purchase_date' mới thêm vào
+features = ['Recency', 'Frequency', 'Monetary']
+df_kmeans = df[features]
+
+# 3. CHUẨN HÓA DỮ LIỆU (Feature Scaling)
+# Vì Recency (ngày), Frequency (lần) và Monetary (tiền) có đơn vị rất lệch nhau
+scaler = StandardScaler()
+df_scaled = scaler.fit_transform(df_kmeans)
+
+# 4. CHẠY THUẬT TOÁN K-MEANS
+# Thiết lập n_clusters=4 (4 tệp khách hang)
+# random_state=42 giúp kết quả phân cụm cố định sau mỗi lần Refesh dữ liệu
+kmeans = KMeans(n_clusters=4, init='k-means++', random_state=42)
+kmeans.fit(df_scaled)
+
+# 5. GÁN KẾT QUẢ CLUSTER VÀO BẢNG GỐC
+# Tạo cột 'Cluster' chứa các giá trị từ 0, 1, 2, 3
+df_original['Cluster'] = kmeans.labels_
