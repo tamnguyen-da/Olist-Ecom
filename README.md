@@ -76,7 +76,7 @@ Ensure the schema configurations in the **Model View** tab map as follows:
 
 > 🔍 **Granular Verification via Customer Segmentation:**
 > Cross-referencing this with our K-Means segments disproves the "customer churn" hypothesis. Evidence shows that **Loyal Customers** remained highly active, still pushing nearly 506 orders in February.
-![Olist Business Dashboard](Dashboard_Image/Dashboard_Image/Loyal_Cus_Segment.png)
+![Olist Business Dashboard](Dashboard_Image/Loyal_Cus_Seg.png)
 
 > The revenue crash was entirely driven by a **severe drop in Average Order Value (AOV), skyrocketing down below $150**. Customers were buying at their usual frequency, but they were checking out extremely low-value baskets.
 
@@ -93,4 +93,4 @@ An analysis of segment-specific logistics metrics revealed a critical operationa
 * **The Volume-Driven Segments:** Conversely, the remaining two lower-tier segments enjoy minimal shipping friction, which allows them to generate the vast majority of Olist's total aggregate revenue through sheer order volume.
 
 💡 **Strategic Recommendation:** Olist should audit its logistics network and pilot **targeted freight subsidies** or **threshold-based free shipping tiers** specifically engineered for High-Spenders and Loyal Customers to unlock higher purchase frequencies.
-![Olist Business Dashboard](Cust_Seg_View.png)
+![Olist Business Dashboard](Dashboard_Image/Cust_Seg_View.png)
