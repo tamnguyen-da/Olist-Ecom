@@ -71,12 +71,12 @@ Ensure the schema configurations in the **Model View** tab map as follows:
 ### 📈 Insight 1: Growth Macro Trends & The Feb 2018 Revenue Anomaly
 * **Macro Trends (2017 - 2018):** Throughout 2017, Olist experienced healthy, linear growth where Revenue, Sales Volume, and Customer Acquisition expanded in perfect correlation. However, 2018 marked a plateau phase; both customer volume and order counts flattened out across months, showing a slight contraction toward the end of the year.
 * **The February 2018 Anomaly:** The data highlights February 2018 as the lowest revenue point in the entire timeline. Paradoxically, **Total Orders and Total Customers did not drop**—in fact, transaction volumes remained neck-and-neck with peak months (April, May) and noticeably higher than later periods (June, July, August).
-![Olist Business Dashboard](Overview.png)
-![Olist Business Dashboard](Overview_w_filterpane.png)
+![Olist Business Dashboard](Dashboard_Image/Overview.png)
+![Olist Business Dashboard](Dashboard_Image/Overview_w_filterpane.png)
 
 > 🔍 **Granular Verification via Customer Segmentation:**
 > Cross-referencing this with our K-Means segments disproves the "customer churn" hypothesis. Evidence shows that **Loyal Customers** remained highly active, still pushing nearly 506 orders in February.
-![Olist Business Dashboard](Loyal_Cus_Segment.png)
+![Olist Business Dashboard](Dashboard_Image/Loyal_Cus_Seg.png)
 
 > The revenue crash was entirely driven by a **severe drop in Average Order Value (AOV), skyrocketing down below $150**. Customers were buying at their usual frequency, but they were checking out extremely low-value baskets.
 
@@ -92,5 +92,12 @@ An analysis of segment-specific logistics metrics revealed a critical operationa
 * **Logistics Friction for High-Spenders & Loyal Customers:** While **High-Spenders** generate massive basket sizes, they are penalized with **disproportionately high shipping fees (Freight Value)**. A similar high-freight pattern is observed among **Loyal Customers**. This excessive shipping friction serves as the primary psychological barrier restricting their purchase frequency.
 * **The Volume-Driven Segments:** Conversely, the remaining two lower-tier segments enjoy minimal shipping friction, which allows them to generate the vast majority of Olist's total aggregate revenue through sheer order volume.
 
-💡 **Strategic Recommendation:** Olist should audit its logistics network and pilot **targeted freight subsidies** or **threshold-based free shipping tiers** specifically engineered for High-Spenders and Loyal Customers to unlock higher purchase frequencies.
-![Olist Business Dashboard](Cust_Seg_View.png)
+![Olist Business Dashboard](Dashboard_Image/Cust_Seg_View.png)
+
+💡 **Strategic Recommendation:**
+Based on the valuable insights above, Olist needs to shift from a mass marketing strategy to actionable strategies for each segment:
+
+* **Removing logistics barriers for VIPs:** Olist needs to re-audit its shipping network and test freight subsidies or establish threshold-based free shipping limits specifically for **High-spenders** and **Loyal customers** to encourage their purchase frequency.
+
+* **Achieving Average Value (AOV) recovery strategy:** To address the revenue decline due to low AOV, the Sales department needs to implement product bundles (product bundling) or suggest related products (cross-selling/up-selling) for price-sensitive customer groups to increase order value.
+
