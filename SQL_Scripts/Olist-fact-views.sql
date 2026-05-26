@@ -114,8 +114,9 @@ on orders.customer_id = customers.customer_id
 where year(orders.order_purchase_timestamp) >= 2017;
 GO  
 
+select count(distinct order_id) from fact_orders -- 97248 rows
 
--- VIEW 2: Bảng Fact 2 (fact_order_details hoặc fact_order_items): Chứa thông tin chi tiết từng sản phẩm trong đơn hàng (Một order_id có thể có nhiều dòng), chứa product_id, price, freight_value.
+-- VIEW 2: Bảng Fact 2 (fact_order_details): Chứa thông tin chi tiết từng sản phẩm trong đơn hàng (Một order_id có thể có nhiều dòng), chứa product_id, price, freight_value.
 
 drop view if exists fact_order_items_detail;
 GO
@@ -128,8 +129,17 @@ SELECT
     ROUND(oi.price, 2) AS price,
     ROUND(oi.freight_value, 2) AS freight_value
 FROM olist_order_items_dataset oi
-LEFT JOIN olist_products_dataset p ON oi.product_id = p.product_id;
+LEFT JOIN olist_products_dataset p ON oi.product_id = p.product_id
+WHERE EXISTS (
+    -- Kiểm tra xem order_id này có tồn tại trong danh sách đơn hàng đã được lọc sạch hay không
+    SELECT 1 
+    FROM fact_orders o
+    WHERE o.order_id = oi.order_id
+);
 GO
+
+-- select count(distinct order_id) from fact_order_items_detail 98666 order_id -> Có nhiều order_id không ghi nhận trong bảng fact_orders -> loại bỏ để tránh confuse
+-- Sau: 97248 order_id
 
 --VIEW 3: View fact_customer_profile: Chứa thông tin tổng hợp về khách hàng, bao gồm độ gần đây của đơn hàng cuối cùng (Recency), tần suất mua hàng (Frequency), và tổng giá trị mua hàng (Monetary).
 drop view if exists fact_customer_profile;
@@ -206,3 +216,5 @@ WHERE EXISTS (
     WHERE o.order_id = p.order_id
 );
 GO
+
+-- select count(distinct order_id) from v_payments_clean 97248 rows
