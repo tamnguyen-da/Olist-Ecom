@@ -20,20 +20,6 @@ This project focuses on building an optimized Data Warehouse using a **Star Sche
 
 ---
 
-## 🗂️ Data Warehouse Architecture (Star Schema)
-
-The data model is engineered following Star Schema best practices to optimize Power BI DAX performance and relationship handling:
-
-* **Fact Tables:**
-  * `fact_orders`: Captures high-level order metadata, status, and total financials (1 row per order). *Primary Key:* `order_id`.
-  * `fact_customer_profile`: Consolidates unique customer profiles alongside computed RFM metrics. *Primary Key:* `customer_unique_id`.
-* **Dimension Tables:**
-  * `v_payments_clean`: Contains granular transaction types (`payment_type`, `payment_installments`). Connects to `fact_orders` via a `1 to Many (*)` relationship.
-  * `olist_customers_dataset`: The original standardized customer metadata source.
-  * `dim_date`: A dynamic calendar table generated in Power BI, connecting to the customer's `last_purchase_date` to unlock time-intelligence analytics.
-
----
-
 ## 🤖 Machine Learning Customer Segmentation (RFM)
 
 The RFM (Recency, Frequency, Monetary) segmentation is embedded directly into the Power Query ETL pipeline using an integrated **Python** script:
@@ -60,10 +46,8 @@ Execute the `CreateView-PBI-fact_orders.sql` script inside SQL Server Management
 4. Convert the `last_purchase_date` column data type explicitly back to **Date**.
 
 ### Step 3: Verify Model Relationships
-Ensure the schema configurations in the **Model View** tab map as follows:
-* `fact_orders` (`order_id`) $\rightarrow$ `v_payments_clean` (`order_id`): **1 to Many (*), Cross filter direction: Single**.
-* `dim_date` (`Date`) $\rightarrow$ `fact_customer_profile` (`last_purchase_date`): **1 to Many (*), Cross filter direction: Single**.
 
+![Olist Data Model](Dashboard_Image/data_model.png)
 ---
 
 ## 📊 Business Insights & Deep Dives
