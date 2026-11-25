@@ -1,87 +1,126 @@
-# Olist E-Commerce Data Warehouse & Customer Segmentation Analysis
+# Olist E-Commerce: Growth and Customer Retention
 
-This project focuses on building an optimized Data Warehouse using a **Star Schema** architecture and implementing **Customer Segmentation** via the **K-Means Clustering** algorithm. Using the Olist (Brazil) e-commerce dataset, this project addresses critical real-world data quality and engineering challenges, including the **Fan-out Effect**, **Data Consistency (Revenue Alignment)**, and **Customer Profile Entity Management** over time.
+**Question:** Olist is growing fast. Do its customers come back?
 
----
+**Short answer:** No. From January 2017 to June 2018, 97% of revenue came from first-time buyers, and 98% of customers did not return within 90 days.
 
-## 📌 Core Features & Data Engineering Methodology
+**Tools:** SQL Server (T-SQL views) · Power BI (star schema, DAX) · Python (independent checks)
 
-### 1. Resolving the Fan-out Effect (Data Duplication)
-* **The Challenge:** In the raw Olist dataset, an order (`order_id`) exhibits a Many-to-Many relationship when cross-joined between order items (products) and payment installments. A direct `JOIN` duplicates records across both tables, exponentially inflating metrics like total revenue upon aggregation (`SUM`).
-* **The Solution:** Developed intermediate aggregated CTEs/Views in SQL to independently consolidate product metrics and payment values by `order_id` *before* joining them into the primary Fact table (`fact_orders`). This guarantees a strict **1 row per order** grain in the core sales table.
-
-### 2. Achieving Absolute Data Consistency
-* **The Challenge:** During data cleansing, business logic was applied to exclude flawed records (e.g., orders marked as `delivered` or `shipped` but missing actual delivery timestamps) and restrict temporal scope (keeping only records from `2017` onwards). If these filters aren't propagated to the independent payments dataset, it causes a mismatch in financial numbers on the final dashboard.
-* **The Solution:** Leveraged the `WHERE EXISTS` semi-join clause in SQL to construct a clean payments view (`v_payments_clean`). Only transaction records belonging to valid, pre-cleansed orders in `fact_orders` are retained, ensuring that the total revenue matches perfectly across all reporting tables down to the last cent.
-
-### 3. Standardizing Customer Entity Profiles (Eliminating Count Discrepancies)
-* **The Challenge:** A unique customer (`customer_unique_id`) can purchase items over time and ship them to different addresses. A generic `GROUP BY` on customer IDs and geography splits a single customer into multiple rows across different cities, leading to a structural flaw where `COUNT(customer_unique_id)` exceeds `COUNT(DISTINCT customer_unique_id)`.
-* **The Solution:** Implemented a window function `ROW_NUMBER() OVER (PARTITION BY customer_unique_id ORDER BY order_purchase_timestamp DESC)` to isolate the customer’s **most recent** transaction. This dedupes the geography mapping, ensures a strict **1 row per unique customer** contract in `fact_customer_profile`, and captures their latest location for precise geographic analysis.
+> Currency is Brazilian Real (R$). All figures cover **delivered orders, 1 Jan 2017 to 30 Jun 2018**.
 
 ---
 
-## 🤖 Machine Learning Customer Segmentation (RFM)
+## Key findings
 
-The RFM (Recency, Frequency, Monetary) segmentation is embedded directly into the Power Query ETL pipeline using an integrated **Python** script:
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Growth comes from order volume | Jan–Jun 2018 revenue is up 185% on Jan–Jun 2017. Orders are up 189%, while average order value is down 1.5%. The 2017 base is low |
+| 2 | Growth slowed in 2018 | Monthly revenue fell 11%, from R$ 1.13M in April to R$ 1.01M in June |
+| 3 | Revenue depends on new customers | 97% of revenue comes from a customer's first order |
+| 4 | Few customers return | 2.4% order again within 90 days, for both 2017 and 2018 first-time buyers. No monthly cohort has more than 0.72% of its customers back in any one of the six following months |
+| 5 | A small group carries revenue | One-time High-Value customers are 18% of customers and 49% of revenue |
+| 6 | Late delivery is not a clear driver | 2.1% return after a late first order vs 2.4% on time (z = -1.5, not significant). The 2017 cohort alone shows a significant gap; 2018 does not |
 
-1. **Feature Scaling:** Applied `StandardScaler` to normalize `Recency` (days), `Frequency` (orders count), and `Monetary` (monetary value). This neutralizes scaling bias caused by the vast magnitude differences between financial sums and order frequencies.
-2. **K-Means Clustering:** Executed the K-Means algorithm with `n_clusters=4` and a deterministic seed (`random_state=42`) to guarantee reproducible cluster assignments upon dashboard data refreshes.
-3. **Business Logic Mapping (DAX):** Translated algorithmic cluster outputs ($0, 1, 2, 3$) into actionable corporate business personas based on behavioral statistical distributions:
-   * **Active / New Customers:** Recently engaged shoppers with low Recency metrics.
-   * **Loyal Customers:** Frequent buyers with steady order frequencies.
-   * **High-Spenders (Whales):** High-net-worth accounts generating substantial monetary volume.
-   * **Hibernating / Cold:** At-risk accounts with high Recency metrics who haven't interacted with the platform in months.
+### Recommendation
 
----
+Test a second-order offer for high-value first-time buyers as an A/B test, with the **90-day repeat rate** (baseline 2.4%) as the main KPI. Delivery delay is worth further testing, but the data does not support it as the main cause.
 
-## 🛠️ Deployment & Installation Guide
+### Limitations
 
-### Step 1: Initialize Database Views on SQL Server
-Execute the `CreateView-PBI-fact_orders.sql` script inside SQL Server Management Studio (SSMS) to instantiate the optimized data tier.
-
-### Step 2: Inject the Clustering Script in Power BI
-1. Open the `Olist Ecom Report.pbix` file using Power BI Desktop.
-2. Navigate to **Transform Data** (Power Query) -> Select the `fact_customer_profile` query.
-3. Go to the **Transform** ribbon -> Click **Run Python Script**, and paste the K-Means preprocessing and training code.
-4. Convert the `last_purchase_date` column data type explicitly back to **Date**.
-
-### Step 3: Verify Model Relationships
-
-![Olist Data Model](Dashboard_Image/data_model.png)
----
-
-## 📊 Business Insights & Deep Dives
-
-### 📈 Insight 1: Growth Macro Trends & The Feb 2018 Revenue Anomaly
-* **Macro Trends (2017 - 2018):** Throughout 2017, Olist experienced healthy, linear growth where Revenue, Sales Volume, and Customer Acquisition expanded in perfect correlation. However, 2018 marked a plateau phase; both customer volume and order counts flattened out across months, showing a slight contraction toward the end of the year.
-* **The February 2018 Anomaly:** The data highlights February 2018 as the lowest revenue point in the entire timeline. Paradoxically, **Total Orders and Total Customers did not drop**—in fact, transaction volumes remained neck-and-neck with peak months (April, May) and noticeably higher than later periods (June, July, August).
-![Olist Business Dashboard](Dashboard_Image/Overview.png)
-![Olist Business Dashboard](Dashboard_Image/Overview_w_filterpane.png)
-
-> 🔍 **Granular Verification via Customer Segmentation:**
-> Cross-referencing this with our K-Means segments disproves the "customer churn" hypothesis. Evidence shows that **Loyal Customers** remained highly active, still pushing nearly 506 orders in February.
-![Olist Business Dashboard](Dashboard_Image/Loyal_Cus_Seg.png)
-
-> The revenue crash was entirely driven by a **severe drop in Average Order Value (AOV), skyrocketing down below $150**. Customers were buying at their usual frequency, but they were checking out extremely low-value baskets.
-
-#### 📌 Actionable Business Hypotheses to Validate:
-1. **Post-Holiday Deep Discounting / Clear-Out Campaigns:** This anomaly could be the byproduct of aggressive post-New Year clearance sales or high-value voucher injections, which sustained order volumes but thinned out net revenue per invoice.
-2. **Product Mix Shift:** A temporary structural shift where consumer demand migrated toward low-tier, fast-moving consumer goods (FMCG) rather than premium high-margin items or bulk bundles.
+- The data is observational: these are associations, not proof of cause.
+- "High-Value" is defined as the top 20% of customer spend, so a high revenue share is partly built in.
+- 48% of repeat orders within 90 days were placed on the same day as the first. They may be split baskets, so the median days to the second order (29) excludes them.
+- The lifetime repeat rate (3.0%) should not be compared between years, because later customers have had less time to return.
+- Customers who first bought in 2016 are treated as new in 2017. The effect is very small.
 
 ---
 
-### 🚚 Insight 2: The Shipping Cost Paradox in High-Value Segments
-An analysis of segment-specific logistics metrics revealed a critical operational friction point:
+## Report pages
 
-* **Logistics Friction for High-Spenders & Loyal Customers:** While **High-Spenders** generate massive basket sizes, they are penalized with **disproportionately high shipping fees (Freight Value)**. A similar high-freight pattern is observed among **Loyal Customers**. This excessive shipping friction serves as the primary psychological barrier restricting their purchase frequency.
-* **The Volume-Driven Segments:** Conversely, the remaining two lower-tier segments enjoy minimal shipping friction, which allows them to generate the vast majority of Olist's total aggregate revenue through sheer order volume.
+| Page | What it answers | Main visuals |
+|---|---|---|
+| Executive Overview | Where does revenue come from? | KPIs with YoY and MoM, monthly revenue and AOV, top categories, top states, new vs returning revenue |
+| Customer Retention | Do customers come back? | Retention KPIs, segments, first-order delivery, orders per customer, monthly cohorts |
 
-![Olist Business Dashboard](Dashboard_Image/Cust_Seg_View.png)
+The Overview slicers filter by **order date**. The Retention page filters by **first purchase year**, so each customer belongs to exactly one year and later purchases stay counted.
 
-💡 **Strategic Recommendation:**
-Based on the valuable insights above, Olist needs to shift from a mass marketing strategy to actionable strategies for each segment:
+<!-- Add current screenshots here, for example:
+![Executive Overview](Dashboard_Image/Overview_v2.png)
+![Customer Retention](Dashboard_Image/Retention_v2.png)
+-->
 
-* **Removing logistics barriers for VIPs:** Olist needs to re-audit its shipping network and test freight subsidies or establish threshold-based free shipping limits specifically for **High-spenders** and **Loyal customers** to encourage their purchase frequency.
+---
 
-* **Achieving Average Value (AOV) recovery strategy:** To address the revenue decline due to low AOV, the Sales department needs to implement product bundles (product bundling) or suggest related products (cross-selling/up-selling) for price-sensitive customer groups to increase order value.
+## Data model
 
+```
+dim_date ──1:*── fact_orders ──*:1── dim_customers
+   │                  │
+   │                  └──1:*── fact_payments
+   └──1:*── fact_order_items
+```
+
+| Table | SQL view | Grain |
+|---|---|---|
+| fact_orders | `v2_fact_orders` | One row per order |
+| fact_order_items | `v2_fact_order_items` | One row per order item |
+| fact_payments | `v2_fact_payments` | One row per payment |
+| dim_customers | `v2_dim_customer` | One row per unique customer |
+| dim_date | DAX calculated table | One row per day |
+
+All relationships filter in one direction.
+
+### Design decisions
+
+- **No fan-out:** items and payments are aggregated to order level before joining.
+- **Real customer key:** `customer_unique_id`, because `customer_id` changes with every order.
+- **Delivered only:** an order counts when its status is delivered and it has a delivery date.
+- **Stable order sequence:** `ROW_NUMBER()` ordered by timestamp **and** `order_id`, so New/Returning does not change between refreshes.
+- **Fair repeat rate:** only customers with at least 90 days of history, all measured over the same 90-day window.
+- **Rule-based segments:** by spend and repeat purchase, not recency, so they stay meaningful when filtered by year.
+
+| Segment | Rule |
+|---|---|
+| Repeat Buyers | 2 or more delivered orders |
+| One-time High-Value | One order, spend in the top 20% |
+| One-time Mid-Value | One order, spend between the median and the top 20% |
+| One-time Low-Value | One order, spend below the median |
+
+### Measures
+
+Measures are grouped in four layers: **Base** (sums and counts), **Ratios**, **Time** (MoM and YoY) and **Display** (titles, labels, notes). Display measures mainly build text from the other layers.
+
+---
+
+## Validation
+
+Figures were recomputed in Python from the raw CSV files and compared with Power BI. These matched:
+
+- total and yearly revenue, orders, customers and average order value
+- monthly revenue, orders and new-buyer share (18 months)
+- cohort retention (87 cells)
+- segment counts and revenue shares, overall and by first purchase year
+- 90-day repeat rate
+
+Known difference: state totals use each customer's latest address, so a few orders are assigned to a different state than at purchase time.
+
+---
+
+## How to run
+
+1. Download the [Olist Brazilian E-Commerce dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) and load the CSV files into a SQL Server database named `Olist`.
+2. Run `V2_Redesign/SQL_Scripts/Olist-views-v2.sql`.
+3. Open the `.pbix` file. To refresh, change the server name in Transform data > Data source settings.
+
+The imported data is stored in the `.pbix`, so the report opens without a database.
+
+## Repository
+
+| Path | Content |
+|---|---|
+| `PowerBI_Report/` | Power BI report |
+| `V2_Redesign/SQL_Scripts/` | Current SQL views (`Olist-views-v2.sql` creates all of them) |
+| `SQL_Scripts/v2_fact_orders.sql` | Order fact view on its own |
+| `SQL_Scripts/Olist-fact-views.sql`, `Python_Scripts/` | First version of the project (K-Means segmentation), kept for reference |
+
+Data source: Olist, via Kaggle. Check the dataset page for its licence before reusing the data.
